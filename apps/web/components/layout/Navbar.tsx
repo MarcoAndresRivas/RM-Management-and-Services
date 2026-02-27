@@ -21,67 +21,91 @@ export function Navbar() {
 
     return (
         <header
-            className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
-                ? "bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-neutral-200 dark:border-neutral-800 shadow-sm py-3"
-                : "bg-transparent py-5"
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl transition-all duration-500 ${scrolled
+                ? "py-0"
+                : "py-2"
                 }`}
         >
-            <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
+            <div className={`flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-500 ${scrolled
+                ? "bg-black/60 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]"
+                : "bg-white/5 backdrop-blur-md border border-white/5"}`}>
 
-                {/* Left - companies dropdown */}
-                <nav className="hidden md:flex items-center gap-8 flex-1">
+                {/* Left - Navigation Items */}
+                <nav className="hidden md:flex items-center gap-8">
                     <div className="relative group">
-                        <button className={`text-sm font-semibold tracking-wide uppercase transition-colors hover:opacity-100 ${scrolled ? 'text-black dark:text-white' : 'text-white opacity-80'}`}>
-                            Empresas ▾
+                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/70 transition-colors hover:text-white">
+                            Sectores
+                            <span className="text-[8px] opacity-40 group-hover:rotate-180 transition-transform duration-300">▼</span>
                         </button>
-                        <div className="absolute left-0 top-full mt-2 w-64 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all rounded-2xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-100 dark:border-neutral-800 p-2 z-50">
-                            <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 px-3 py-2">Tiendas Online</div>
-                            <Link href="/stores/conveniencia" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-green-50 dark:hover:bg-green-950/20 text-neutral-700 dark:text-neutral-300 hover:text-green-700">🛒 RM Conveniencia</Link>
-                            <Link href="/stores/tech" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-950/20 text-neutral-700 dark:text-neutral-300 hover:text-blue-700">💻 RM Tech & Electronics</Link>
-                            <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 px-3 py-2 mt-1">Servicios</div>
-                            <Link href="/services/ingenieria" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-orange-50 dark:hover:bg-orange-950/20 text-neutral-700 dark:text-neutral-300 hover:text-orange-700">🔧 RM Ingeniería</Link>
-                            <Link href="/services/dental" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-cyan-50 dark:hover:bg-cyan-950/20 text-neutral-700 dark:text-neutral-300 hover:text-cyan-700">😊 RM Dental</Link>
-                            <Link href="/services/estetica" className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-pink-50 dark:hover:bg-pink-950/20 text-neutral-700 dark:text-neutral-300 hover:text-pink-700">✨ RM Estética</Link>
+
+                        {/* Elegant Dropdown */}
+                        <div className="absolute left-[-20px] top-full mt-4 w-72 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto transition-all duration-300">
+                            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/90 backdrop-blur-2xl p-3 shadow-2xl">
+                                <div className="p-3 mb-2 rounded-2xl bg-blue-500/5 border border-blue-500/10">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Corporativo</p>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <Link href="/stores/conveniencia" className="flex items-center justify-between group/item rounded-xl px-4 py-3 text-sm font-medium hover:bg-white/5 transition-all">
+                                        <span className="text-neutral-300 group-hover/item:text-white">RM Conveniencia</span>
+                                        <span className="text-[10px] text-green-500 opacity-0 group-hover/item:opacity-100 transition-opacity uppercase font-bold">Store</span>
+                                    </Link>
+                                    <Link href="/stores/tech" className="flex items-center justify-between group/item rounded-xl px-4 py-3 text-sm font-medium hover:bg-white/5 transition-all">
+                                        <span className="text-neutral-300 group-hover/item:text-white">RM Tech & Electronics</span>
+                                        <span className="text-[10px] text-blue-500 opacity-0 group-hover/item:opacity-100 transition-opacity uppercase font-bold">Tech</span>
+                                    </Link>
+                                    <Link href="/services/ingenieria" className="flex items-center justify-between group/item rounded-xl px-4 py-3 text-sm font-medium hover:bg-white/5 transition-all">
+                                        <span className="text-neutral-300 group-hover/item:text-white">RM Ingeniería</span>
+                                        <span className="text-[10px] text-orange-500 opacity-0 group-hover/item:opacity-100 transition-opacity uppercase font-bold">Eng</span>
+                                    </Link>
+                                    <Link href="/services/dental" className="flex items-center justify-between group/item rounded-xl px-4 py-3 text-sm font-medium hover:bg-white/5 transition-all">
+                                        <span className="text-neutral-300 group-hover/item:text-white">RM Dental</span>
+                                        <span className="text-[10px] text-cyan-500 opacity-0 group-hover/item:opacity-100 transition-opacity uppercase font-bold">Health</span>
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <Link href="/products" className={`text-sm font-semibold tracking-wide uppercase transition-colors hover:opacity-100 ${scrolled ? 'text-black dark:text-white' : 'text-white opacity-80'}`}>
+
+                    <Link href="/products" className="text-[10px] font-black uppercase tracking-widest text-white/70 transition-colors hover:text-white">
                         Catálogo
                     </Link>
                 </nav>
 
-                {/* Logo */}
-                <div className="flex-1 text-center md:text-center md:flex-none">
-                    <Link href="/" className="inline-block transition-transform hover:scale-105">
-                        <span className={`font-black text-xl tracking-tighter ${scrolled ? 'text-black dark:text-white' : 'text-white'}`}>
-                            RM<span className="opacity-50 font-normal">HOLDING</span>
+                {/* Center - Logo */}
+                <div className="absolute left-1/2 -translate-x-1/2">
+                    <Link href="/" className="group flex items-center gap-2 transition-transform hover:scale-105">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-white text-xs shadow-lg shadow-blue-500/20 group-hover:rotate-12 transition-all duration-300">
+                            RM
+                        </div>
+                        <span className="font-black text-base tracking-tighter text-white">
+                            MANAGEMENT
                         </span>
                     </Link>
                 </div>
 
                 {/* Right Actions */}
-                <div className="flex items-center justify-end gap-5 flex-1">
-                    <Link href="/dashboard" className={`hidden sm:block transition-colors hover:opacity-100 ${scrolled ? 'text-black dark:text-white' : 'text-white opacity-80'}`}>
+                <div className="flex items-center gap-4">
+                    <Link
+                        href="/dashboard"
+                        className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                        title="Dashboard"
+                    >
                         <User className="w-5 h-5" />
                     </Link>
 
                     <Link href="/cart" className="relative group">
-                        <button
-                            className={`p-2 rounded-full transition-all ${scrolled
-                                ? "bg-black text-white dark:bg-white dark:text-black hover:scale-105"
-                                : "bg-white/20 text-white backdrop-blur-md hover:bg-white/30"
-                                }`}
-                            aria-label="View Cart"
-                        >
-                            <ShoppingBag className="w-5 h-5" />
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-lg shadow-white/5">
+                            <ShoppingBag className="w-4 h-4" />
+                            <span>Cart</span>
                             {mounted && totalItems > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-black">
+                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-black text-white ring-2 ring-white">
                                     {totalItems}
                                 </span>
                             )}
-                        </button>
+                        </div>
                     </Link>
                 </div>
-
             </div>
         </header>
     );
