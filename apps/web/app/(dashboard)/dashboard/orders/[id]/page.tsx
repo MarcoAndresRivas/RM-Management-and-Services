@@ -49,7 +49,8 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
 type StatusColor = { bg: string; text: string; border: string };
 
 function getStatusColor(status: string): StatusColor {
-    return (STATUS_COLORS as Record<string, StatusColor>)[status] || STATUS_COLORS.PENDING;
+    const color = (STATUS_COLORS as Record<string, StatusColor>)[status];
+    return color ?? STATUS_COLORS.PENDING;
 }
 
 function StatusBadge({ status }: { status: string }) {
