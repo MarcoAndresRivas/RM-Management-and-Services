@@ -38,6 +38,32 @@ const DTE_STATUS_LABELS: Record<string, { label: string; color: string }> = {
     REJECTED_CUSTOMER: { label: "Rechazado por cliente", color: "#DC2626" },
 };
 
+const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+    PENDING: { bg: "#FEF3C7", text: "#92400E", border: "#FDE68A" }, // Yellowish
+    PROCESSING: { bg: "#DBEAFE", text: "#1E40AF", border: "#BFDBFE" }, // Bluish
+    SHIPPED: { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Greenish
+    DELIVERED: { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Greenish
+    CANCELLED: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" }, // Reddish
+};
+
+function StatusBadge({ status }: { status: string }) {
+    const c = (STATUS_COLORS[status] || STATUS_COLORS.PENDING) as { bg: string; text: string; border: string };
+    return (
+        <span style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            background: c.bg, color: c.text,
+            border: `1px solid ${c.border}`,
+            borderRadius: 6,
+            padding: "0.25rem 0.6rem",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            textTransform: "uppercase",
+        }}>
+            {status}
+        </span>
+    );
+}
+
 function SectionCard({ title, icon: Icon, children }: {
     title: string;
     icon: React.ComponentType<{ size?: number }>;
@@ -74,9 +100,12 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
     );
 }
 
-export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderDetailsPage(props: {
+    params: Promise<{ id: string }>;
+}) {
     await auth();
-    const resolvedParams = await params;
+    const resolvedParams = await props.params;
+    const orderId = resolvedParams.id;
 
     const tenant = await prisma.tenant.findFirst();
     if (!tenant) return notFound();

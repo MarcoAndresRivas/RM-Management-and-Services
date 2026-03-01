@@ -24,7 +24,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
 };
 
 function StatusBadge({ status }: { status: string }) {
-    const c = STATUS_COLORS[status] ?? STATUS_COLORS.PENDING;
+    const c = (STATUS_COLORS[status] || STATUS_COLORS.PENDING) as { bg: string; text: string; border: string };
     return (
         <span style={{
             display: "inline-flex", alignItems: "center", gap: 5,
@@ -40,11 +40,10 @@ function StatusBadge({ status }: { status: string }) {
 
 const clp = (n: number) => new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(n);
 
-export default async function OrdersPage({
-    searchParams,
-}: {
-    searchParams: { status?: string };
+export default async function OrdersPage(props: {
+    searchParams: Promise<{ status?: string }>;
 }) {
+    const searchParams = await props.searchParams;
     const tenant = await prisma.tenant.findFirst();
     const stats = tenant ? await getOrderStats(tenant.id) : null;
 
