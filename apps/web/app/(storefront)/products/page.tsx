@@ -6,11 +6,10 @@ import { ProductFilters } from "@/components/storefront/ProductFilters";
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProductsPage({
-    searchParams,
-}: {
-    searchParams: { q?: string; category?: string };
+export default async function ProductsPage(props: {
+    searchParams: Promise<{ q?: string; category?: string }>;
 }) {
+    const searchParams = await props.searchParams;
     // Next.js 15+ needs to await searchParams
     const resolvedParams = await searchParams;
 

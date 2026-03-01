@@ -3,11 +3,10 @@ import Link from "next/link";
 import { CheckCircle2, ChevronRight, Package, Receipt, ArrowLeft, ExternalLink } from "lucide-react";
 import { prisma } from "@repo/db";
 
-export default async function CheckoutSuccessPage({
-    searchParams,
-}: {
-    searchParams: { [key: string]: string | string[] | undefined };
+export default async function CheckoutSuccessPage(props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+    const searchParams = await props.searchParams;
     const orderId = searchParams.orderId as string;
 
     // Attempt to fetch real order data if ID is provided
