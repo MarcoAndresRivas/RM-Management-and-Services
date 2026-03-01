@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@repo/db";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 /**
  * Webhook for MercadoPago.
@@ -9,19 +10,10 @@ import { prisma } from "@repo/db";
 export async function POST(req: Request) {
     try {
         const url = new URL(req.url);
-        // MercadoPago usually sends query params like topic=payment & id=123
-        // Or it sends a JSON body with { action: "payment.created", data: { id: "123" } }
-
-        // For security in a real app, verify the signature!
-
         const body = await req.json().catch(() => ({}));
 
-        // Mocking the extraction of external_reference (our orderId) from the MP API or the body
-        // Real implementation fetches the payment by ID from MercadoPago API to get external_reference
-
-        // Since this is a test/scaffolding, let's assume we receive the orderId in the body or query
         const paymentId = url.searchParams.get("data.id") || body?.data?.id;
-        const orderId = body?.external_reference || url.searchParams.get("external_reference");
+        const orderId = body?.external_reference || url.searchParams.get("external_reference") || body?.data?.external_reference;
 
         if (orderId) {
             console.log(`[Webhook MP] Payment approved for Order: ${orderId}`);
@@ -32,13 +24,14 @@ export async function POST(req: Request) {
                 data: {
                     status: "PAID",
                     paymentId: paymentId?.toString(),
+                },
+                include: {
+                    customer: true
                 }
             });
 
-            // 2. Trigger DTE Emission (Internal Call or direct invocation)
-            // Simulating it directly here for the webhook script:
-
-            const documentType: string = "BOLETA"; // Needs to be fetched from order metadata
+            // 2. Trigger DTE Emission
+            const documentType: string = "BOLETA";
             const folio = Math.floor(Math.random() * 10000) + 1;
 
             await prisma.documentDTE.create({
@@ -53,6 +46,12 @@ export async function POST(req: Request) {
             });
 
             console.log(`[Webhook MP] DTE emitted successfully for Order: ${orderId}`);
+
+            // 3. Send Transactional Email
+            if (order.customer && order.customer.email) {
+                await sendOrderConfirmationEmail(order.id, order.customer.email, order.totalAmount);
+                console.log(`[Webhook MP] Confirmation email sent to: ${order.customer.email}`);
+            }
         }
 
         return NextResponse.json({ success: true });
@@ -61,3 +60,4 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Webhook Error" }, { status: 500 });
     }
 }
+

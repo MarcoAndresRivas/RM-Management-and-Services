@@ -7,52 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ------------------------------------------------------
-// CORE ERP MODELS
-// ------------------------------------------------------
+// ==========================================
+// CORE & MULTI-TENANCY
+// ==========================================
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  subdomain String?  @unique
-  slug      String?  @unique
-  
-  // Tax / Legal Information (SII)
+  id                  String   @id @default(cuid())
+  name                String
+  slug                String?  @unique
   rut                 String?  @unique
   razonSocial         String?
   giro                String?
   direccionTributaria String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users       User[]
-  customers   Customer[]
-  employees   Employee[]
-  products    Product[]
-  categories  Category[]
-  orders      Order[]
-  dtes        DocumentDTE[]
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  tenantId      String?
-  tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  accounts      Account[]
-  sessions      Session[]
-
-  @@index([tenantId])
+  users      User[]
+  customers  Customer[]
+  products   Product[]
+  categories Category[]
+  orders     Order[]
+  dtes       DocumentDTE[]
 }
 
 model Account {
@@ -92,12 +67,37 @@ model VerificationToken {
 
 enum Role {
   USER
+  MANAGER_SUCURSAL
   ADMIN
-  MANAGER
 }
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  accounts Account[]
+  sessions Session[]
+
+  @@index([tenantId])
+}
+
+// ==========================================
+// CRM: CUSTOMERS
+// ==========================================
 
 model Customer {
   id        String   @id @default(cuid())
+  rut       String?  @unique // Clave para Facturas B2B
   name      String
   email     String?
   phone     String?
@@ -105,71 +105,72 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  orders    Order[]
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders   Order[]
 
   @@index([tenantId])
+  @@index([rut])
 }
 
-model Employee {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String?
-  position  String?
-  hireDate  DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId])
-}
-
-// ------------------------------------------------------
-// INVENTORY & PRODUCT MODELS
-// ------------------------------------------------------
+// ==========================================
+// PRODUCT & INVENTORY MANAGEMENT (PIM)
+// ==========================================
 
 model Category {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  products    Product[]
+  tenantId String
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products Product[]
 
   @@index([tenantId])
 }
 
 model Product {
   id          String   @id @default(cuid())
+  sku         String? // Control unitario
   name        String
-  description String?
-  sku         String?
+  description String?  @db.Text
   price       Float    @default(0)
   stock       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  orderItems  OrderItem[]
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  images     ProductImage[]
+  orderItems OrderItem[]
 
   @@index([tenantId])
   @@index([categoryId])
+  @@index([sku])
 }
 
-// ------------------------------------------------------
-// E-COMMERCE & SII MODELS
-// ------------------------------------------------------
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String // Storage in AWS S3 or Cloudinary
+  altText   String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ==========================================
+// SALES & ORDER MANAGEMENT
+// ==========================================
 
 enum OrderStatus {
   PENDING
@@ -181,7 +182,7 @@ enum OrderStatus {
 
 enum PaymentGateway {
   MERCADOPAGO
-  WEBPAY
+  WEBPAY_PLUS
   CRYPTO
   MACH
   TENPO
@@ -189,66 +190,94 @@ enum PaymentGateway {
 }
 
 model Order {
-  id            String         @id @default(cuid())
-  orderNumber   Int            @default(autoincrement()) @unique
-  status        OrderStatus    @default(PENDING)
-  totalAmount   Float          @default(0)
-  
-  customerId    String?
-  customer      Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  
-  tenantId      String
-  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id          String      @id @default(cuid())
+  orderNumber Int         @unique @default(autoincrement()) // Referencia interna UI
+  status      OrderStatus @default(PENDING)
+  totalAmount Float       @default(0)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   paymentMethod PaymentGateway?
-  paymentId     String?        // ID from the payment gateway
+  paymentId     String? // Token WP Plus / ID MercadoPago
+  paymentStatus String? // Detalles síncronos de la pasarela
 
-  items         OrderItem[]
-  dte           DocumentDTE?
+  items OrderItem[]
+  dte   DocumentDTE?
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([customerId])
+  @@index([orderNumber])
 }
 
 model OrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  
-  quantity    Int      @default(1)
-  unitPrice   Float    @default(0)
-  totalPrice  Float    @default(0)
+  id         String @id @default(cuid())
+  quantity   Int    @default(1)
+  unitPrice  Float  @default(0)
+  totalPrice Float  @default(0)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
   @@index([orderId])
   @@index([productId])
 }
 
+// ==========================================
+// TAX COMPLIANCE (SII CHILE - DTE)
+// ==========================================
+
 enum DTEType {
-  BOLETA_ELECTRONICA
-  FACTURA_ELECTRONICA
+  BOLETA_ELECTRONICA // Code 39
+  FACTURA_ELECTRONICA // Code 33
+  GUIA_DESPACHO // Code 52
+  NOTA_CREDITO // Code 61
+  NOTA_DEBITO // Code 56
+}
+
+enum DTEStatus {
+  PENDING
+  GENERATED
+  ACCEPTED_SII
+  REJECTED_SII
+  ACCEPTED_CUSTOMER
+  REJECTED_CUSTOMER
 }
 
 model DocumentDTE {
-  id          String   @id @default(cuid())
-  folio       Int?
-  type        DTEType
-  xmlUrl      String?
-  pdfUrl      String?
-  
-  orderId     String   @unique
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id     String    @id @default(cuid())
+  type   DTEType
+  folio  Int?
+  status DTEStatus @default(PENDING)
 
-  createdAt   DateTime @default(now())
+  // Storage for immutable 6-year retention rule
+  xmlUrl String? // Immutable AWS S3 Link
+  pdfUrl String?
+  cafUrl String? // Código de Autorización de Folios xml
+
+  // Tracking timelines (SII 8 Day rule)
+  issuedAt   DateTime?
+  acceptedAt DateTime?
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
   @@index([orderId])
+  @@index([folio])
 }

@@ -120,8 +120,8 @@ export default async function CustomersPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-semibold text-neutral-900 dark:text-white">{customer.name || "Sin nombre"}</p>
-                                                    {customer.documentId && (
-                                                        <p className="text-xs text-neutral-400">RUT: {customer.documentId}</p>
+                                                    {customer.rut && (
+                                                        <p className="text-xs text-neutral-400">RUT: {customer.rut}</p>
                                                     )}
                                                 </div>
                                             </div>

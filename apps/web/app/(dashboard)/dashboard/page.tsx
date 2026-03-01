@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     const now = new Date();
     const monthlySales = Array.from({ length: 6 }, (_, i) => {
         const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-        const monthLabel = MONTH_NAMES[d.getMonth()];
+        const monthLabel = MONTH_NAMES[d.getMonth()] || "N/A";
         const monthOrders = paidOrders.filter(o => {
             const od = new Date(o.createdAt);
             return od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear();
@@ -50,14 +50,14 @@ export default async function DashboardPage() {
     const categoryMap: Record<string, number> = {};
     for (const item of orderItems) {
         const cat = item.product?.category?.name || "Sin categoría";
-        categoryMap[cat] = (categoryMap[cat] || 0) + (item.price * item.quantity);
+        categoryMap[cat] = (categoryMap[cat] || 0) + item.totalPrice;
     }
     const categorySales = Object.entries(categoryMap).map(([name, value]) => ({ name, value }));
 
     return (
         <div className="flex-1 space-y-6 p-8 pt-6 relative">
             {/* Background ambient */}
-            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-indigo-50/50 to-transparent dark:from-indigo-950/20 dark:to-transparent pointer-events-none -z-10" />
+            <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-brand-cyan/5 to-transparent pointer-events-none -z-10" />
 
             <DashboardClient
                 revenue={totalRevenue}

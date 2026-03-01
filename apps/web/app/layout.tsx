@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
-
-import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
   title: "RM Management & Services | Holding Empresarial",
@@ -25,10 +19,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Navbar />
-        <main className="min-h-screen">
+    <html lang="es" className={inter.variable}>
+      <body style={{ margin: 0, padding: 0 }}>
+        <main>
           {children}
         </main>
         <Toaster />
@@ -36,3 +29,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+

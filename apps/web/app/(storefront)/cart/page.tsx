@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCartStore } from "@/lib/store/useCartStore";
 import { Minus, Plus, Trash2, ArrowRight, ShieldCheck } from "lucide-react";
+import { WebpayCheckoutButton } from "@/components/storefront/WebpayCheckoutButton";
 
 export default function CartPage() {
     const [mounted, setMounted] = useState(false);
@@ -119,17 +120,11 @@ export default function CartPage() {
                                 <span>{new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(totalPrice)}</span>
                             </div>
 
-                            <Link
-                                href="/checkout"
-                                className="w-full flex justify-between items-center rounded-full bg-black dark:bg-white px-6 py-4 font-bold text-white dark:text-black hover:scale-[1.02] active:scale-95 transition-transform"
-                            >
-                                <span>Checkout</span>
-                                <ArrowRight className="w-5 h-5 opacity-70" />
-                            </Link>
+                            <WebpayCheckoutButton />
 
                             <div className="mt-6 flex items-start gap-3 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-xl text-xs text-neutral-500 dark:text-neutral-400">
                                 <ShieldCheck className="w-5 h-5 shrink-0 text-green-600" />
-                                <p>Secure checkout guaranteed. 30-day return policy on all unworn items.</p>
+                                <p>Secure checkout guaranteed. Protected by Transbank Webpay Plus.</p>
                             </div>
                         </div>
                     </div>
