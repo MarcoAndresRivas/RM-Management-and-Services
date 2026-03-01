@@ -21,17 +21,30 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
     SHIPPED: { bg: "#DBEAFE", text: "#1E3A8A", border: "#3B82F6" },
     COMPLETED: { bg: "#EDE9FE", text: "#4C1D95", border: "#7C3AED" },
     CANCELLED: { bg: "#FEE2E2", text: "#7F1D1D", border: "#EF4444" },
-};
+} as const;
+
+type StatusColor = { bg: string; text: string; border: string };
+
+function getStatusColor(status: string): StatusColor {
+    const color = (STATUS_COLORS as Record<string, StatusColor>)[status];
+    return color ?? STATUS_COLORS.PENDING;
+}
 
 function StatusBadge({ status }: { status: string }) {
-    const c = (STATUS_COLORS[status] || STATUS_COLORS.PENDING) as { bg: string; text: string; border: string };
+    const c = getStatusColor(status);
     return (
         <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: c.bg, color: c.text,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            backgroundColor: c.bg,
+            color: c.text,
             border: `1px solid ${c.border}`,
-            borderRadius: 999, padding: "0.2rem 0.7rem",
-            fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.03em",
+            borderRadius: 999,
+            padding: "0.2rem 0.7rem",
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
         }}>
             {STATUS_LABELS[status] ?? status}
         </span>

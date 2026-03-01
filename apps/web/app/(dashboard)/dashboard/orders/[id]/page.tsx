@@ -44,14 +44,23 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
     SHIPPED: { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Greenish
     DELIVERED: { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // Greenish
     CANCELLED: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" }, // Reddish
-};
+} as const;
+
+type StatusColor = { bg: string; text: string; border: string };
+
+function getStatusColor(status: string): StatusColor {
+    return (STATUS_COLORS as Record<string, StatusColor>)[status] || STATUS_COLORS.PENDING;
+}
 
 function StatusBadge({ status }: { status: string }) {
-    const c = (STATUS_COLORS[status] || STATUS_COLORS.PENDING) as { bg: string; text: string; border: string };
+    const c = getStatusColor(status);
     return (
         <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: c.bg, color: c.text,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            backgroundColor: c.bg,
+            color: c.text,
             border: `1px solid ${c.border}`,
             borderRadius: 6,
             padding: "0.25rem 0.6rem",
